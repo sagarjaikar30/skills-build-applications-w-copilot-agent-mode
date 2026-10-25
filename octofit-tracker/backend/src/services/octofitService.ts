@@ -35,8 +35,8 @@ export async function createActivity(input: unknown) {
   const userId = objectId(body.userId, 'userId');
   const teamId = objectId(body.teamId, 'teamId');
   const type = requiredText(body.type, 'type');
-  if (typeof body.minutes !== 'number' || !Number.isFinite(body.minutes) || body.minutes <= 0) {
-    return fail(400, 'minutes must be a positive number');
+  if (typeof body.minutes !== 'number' || !Number.isInteger(body.minutes) || body.minutes <= 0) {
+    return fail(400, 'minutes must be a positive whole number');
   }
 
   const [user, team] = await Promise.all([User.findById(userId), Team.findById(teamId)]);

@@ -65,4 +65,22 @@ describe('team relationship integrity', () => {
     expect(response.status).toBeLessThan(500);
     expect(await Activity.countDocuments()).toBe(0);
   });
+
+  it('rejects fractional activity minutes without persisting a record', async () => {
+    const team = await Team.create({ name: 'Octocats', mascot: 'Mona', members: [] });
+    const member = await User.create({
+      name: 'Mona',
+      email: 'mona@example.com',
+      team: team._id,
+      fitnessGoal: 'endurance',
+    });
+    await Team.updateOne({ _id: team._id }, { $addToSet: { members: member._id } });
+
+    const response = await request(app)
+      .post('/api/activities')
+      .send({ userId: member._id.toString(), teamId: team._id.toString(), type: 'run', minutes: 1.5 });
+
+    expect(response.status).toBe(400);
+    expect(await Activity.countDocuments()).toBe(0);
+  });
 });

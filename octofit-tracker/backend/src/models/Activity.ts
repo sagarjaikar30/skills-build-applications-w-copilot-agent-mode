@@ -4,7 +4,15 @@ const activitySchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   team: { type: Schema.Types.ObjectId, ref: 'Team', required: true },
   type: { type: String, required: true, trim: true, lowercase: true },
-  minutes: { type: Number, required: true, min: 1 },
+  minutes: {
+    type: Number,
+    required: true,
+    min: 1,
+    validate: {
+      validator: (minutes: number) => Number.isInteger(minutes),
+      message: 'Activity minutes must be a whole number',
+    },
+  },
   points: { type: Number, required: true, min: 1 },
   occurredAt: { type: Date, required: true },
 });

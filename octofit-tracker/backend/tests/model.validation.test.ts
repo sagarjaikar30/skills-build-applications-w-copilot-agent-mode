@@ -31,6 +31,16 @@ describe('OctoFit model validation', () => {
     expect(activity.type).toBe('run');
     expect(error?.errors.minutes).toBeDefined();
     expect(error?.errors.points).toBeDefined();
+
+    const fractionalActivity = new Activity({
+      user: new Types.ObjectId(),
+      team: new Types.ObjectId(),
+      type: 'run',
+      minutes: 1.5,
+      points: 1.5,
+      occurredAt: new Date(),
+    });
+    expect(fractionalActivity.validateSync()?.errors.minutes).toBeDefined();
   });
 
   it('normalizes workout focus and restricts difficulty to supported values', () => {
