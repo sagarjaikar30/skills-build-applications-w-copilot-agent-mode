@@ -7,13 +7,15 @@ interface ApiDataState<T> {
   error: string | null;
 }
 
-export function useApiData<T>(path: string): ApiDataState<T> {
+type ApiLoader<T> = (path: string) => Promise<T>;
+
+export function useApiData<T>(path: string, load: ApiLoader<T>): ApiDataState<T> {
   const [state, setState] = useState<ApiDataState<T>>({ data: null, loading: true, error: null });
 
   useEffect(() => {
     let active = true;
     setState({ data: null, loading: true, error: null });
-    getJson<T>(path)
+    load(path)
       .then((data) => {
         if (active) setState({ data, loading: false, error: null });
       })
@@ -30,7 +32,7 @@ export function useApiData<T>(path: string): ApiDataState<T> {
     return () => {
       active = false;
     };
-  }, [path]);
+  }, [path, load]);
 
   return state;
 }

@@ -1,4 +1,5 @@
 import { useApiData } from '../api/useApiData.js';
+import { getJson } from '../api/client.js';
 
 interface WorkoutSuggestion {
   _id?: string;
@@ -9,10 +10,13 @@ interface WorkoutSuggestion {
   reason?: string;
 }
 
+const loadWorkouts = (path: string) => getJson<{ suggestions: WorkoutSuggestion[] }>(path);
+
 export default function Workouts() {
   const userEmail = 'mona@example.com';
-  const { data, loading, error } = useApiData<{ suggestions: WorkoutSuggestion[] }>(
+  const { data, loading, error } = useApiData(
     `/api/workouts/suggestions/${encodeURIComponent(userEmail)}`,
+    loadWorkouts,
   );
   const suggestions = data?.suggestions ?? [];
 

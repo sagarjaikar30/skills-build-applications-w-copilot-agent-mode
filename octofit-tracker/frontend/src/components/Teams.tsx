@@ -1,4 +1,5 @@
 import { useApiData } from '../api/useApiData.js';
+import { getJson } from '../api/client.js';
 
 interface Team {
   _id?: string;
@@ -7,8 +8,10 @@ interface Team {
   members: string[];
 }
 
+const loadTeams = (path: string) => getJson<{ teams: Team[] }>(path);
+
 export default function Teams() {
-  const { data, loading, error } = useApiData<{ teams: Team[] }>('/api/teams');
+  const { data, loading, error } = useApiData('/api/teams', loadTeams);
   const teams = data?.teams ?? [];
 
   return <section><h2>Teams</h2>

@@ -1,4 +1,5 @@
 import { useApiData } from '../api/useApiData.js';
+import { getJson } from '../api/client.js';
 
 interface Activity {
   _id?: string;
@@ -7,8 +8,10 @@ interface Activity {
   points: number;
 }
 
+const loadActivities = (path: string) => getJson<{ activities: Activity[] }>(path);
+
 export default function Activities() {
-  const { data, loading, error } = useApiData<{ activities: Activity[] }>('/api/activities');
+  const { data, loading, error } = useApiData('/api/activities', loadActivities);
   const activities = data?.activities ?? [];
 
   return <section><h2>Activities</h2>

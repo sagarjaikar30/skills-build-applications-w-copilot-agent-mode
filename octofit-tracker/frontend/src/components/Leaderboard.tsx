@@ -1,4 +1,5 @@
 import { useApiData } from '../api/useApiData.js';
+import { getJson } from '../api/client.js';
 
 interface LeaderboardEntry {
   teamName: string;
@@ -6,8 +7,10 @@ interface LeaderboardEntry {
   rank: number;
 }
 
+const loadLeaderboard = (path: string) => getJson<{ leaderboard: LeaderboardEntry[] }>(path);
+
 export default function Leaderboard() {
-  const { data, loading, error } = useApiData<{ leaderboard: LeaderboardEntry[] }>('/api/leaderboard');
+  const { data, loading, error } = useApiData('/api/leaderboard', loadLeaderboard);
   const entries = data?.leaderboard ?? [];
 
   return <section><h2>Leaderboard</h2>
