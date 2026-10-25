@@ -41,6 +41,10 @@ export async function createActivity(input: unknown) {
 
   const [user, team] = await Promise.all([User.findById(userId), Team.findById(teamId)]);
   if (!user || !team) return fail(404, 'User or team not found');
+  const isTeamMember = team.members.some((memberId) => memberId.equals(user._id));
+  if (!user.team || user.team.toString() !== team._id.toString() || !isTeamMember) {
+    return fail(400, 'User is not a member of the specified team');
+  }
 
   return Activity.create({
     user: user._id,
@@ -70,7 +74,15 @@ export async function createTeam(input: unknown) {
     if (foundMembers !== members.length) return fail(404, 'One or more members were not found');
   }
 
-  return Team.create({ name, mascot, members });
+  const team = await Team.create({ name, mascot, members });
+  if (members.length > 0) {
+    await Team.updateMany(
+      { _id: { $ne: team._id }, members: { $in: members } },
+      { $pull: { members: { $in: members } } },
+    );
+    await User.updateMany({ _id: { $in: members } }, { $set: { team: team._id } });
+  }
+  return team;
 }
 
 export async function getLeaderboard() {
