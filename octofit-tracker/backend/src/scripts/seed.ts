@@ -10,9 +10,9 @@ async function upsertDemoUser(name: string, email: string, teamId: InstanceType<
   const user = await User.findOneAndUpdate(
     { email },
     { $set: { name, email, team: teamId, fitnessGoal } },
-    { upsert: true, new: true, setDefaultsOnInsert: true },
+    { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
   );
-  await Team.updateOne({ _id: teamId }, { $addToSet: { members: user._id } });
+  await Team.updateOne({ _id: teamId }, { $addToSet: { members: user._id } }, { runValidators: true });
   return user;
 }
 
@@ -22,37 +22,54 @@ export async function seed() {
     const octocats = await Team.findOneAndUpdate(
       { name: 'Octocats' },
       { $set: { name: 'Octocats', mascot: 'Mona' } },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
     );
     const robocats = await Team.findOneAndUpdate(
       { name: 'Robocats' },
       { $set: { name: 'Robocats', mascot: 'Hubot' } },
-      { upsert: true, new: true, setDefaultsOnInsert: true },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
+    );
+    const mobilityMakers = await Team.findOneAndUpdate(
+      { name: 'Mobility Makers' },
+      { $set: { name: 'Mobility Makers', mascot: 'Riley' } },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true },
     );
     const mona = await upsertDemoUser('Mona', 'mona@example.com', octocats._id, 'endurance');
     const hubot = await upsertDemoUser('Hubot', 'hubot@example.com', robocats._id, 'strength');
+    const riley = await upsertDemoUser('Riley', 'riley@example.com', mobilityMakers._id, 'mobility');
 
     const monaRunAt = new Date('2026-01-10T12:00:00.000Z');
     const hubotCycleAt = new Date('2026-01-11T12:00:00.000Z');
+    const rileyMobilityAt = new Date('2026-01-12T12:00:00.000Z');
     await Activity.updateOne(
       { user: mona._id, team: octocats._id, type: 'run', occurredAt: monaRunAt },
       { $set: { user: mona._id, team: octocats._id, type: 'run', minutes: 40, points: 40, occurredAt: monaRunAt } },
-      { upsert: true },
+      { upsert: true, runValidators: true },
     );
     await Activity.updateOne(
       { user: hubot._id, team: robocats._id, type: 'cycle', occurredAt: hubotCycleAt },
       { $set: { user: hubot._id, team: robocats._id, type: 'cycle', minutes: 25, points: 25, occurredAt: hubotCycleAt } },
-      { upsert: true },
+      { upsert: true, runValidators: true },
+    );
+    await Activity.updateOne(
+      { user: riley._id, team: mobilityMakers._id, type: 'mobility', occurredAt: rileyMobilityAt },
+      { $set: { user: riley._id, team: mobilityMakers._id, type: 'mobility', minutes: 20, points: 20, occurredAt: rileyMobilityAt } },
+      { upsert: true, runValidators: true },
     );
     await Workout.updateOne(
       { title: 'Intervals' },
       { $set: { title: 'Intervals', focus: 'endurance', minutes: 30, difficulty: 'moderate' } },
-      { upsert: true },
+      { upsert: true, runValidators: true },
     );
     await Workout.updateOne(
       { title: 'Strength Circuit' },
       { $set: { title: 'Strength Circuit', focus: 'strength', minutes: 30, difficulty: 'moderate' } },
-      { upsert: true },
+      { upsert: true, runValidators: true },
+    );
+    await Workout.updateOne(
+      { title: 'Mobility Flow' },
+      { $set: { title: 'Mobility Flow', focus: 'mobility', minutes: 25, difficulty: 'easy' } },
+      { upsert: true, runValidators: true },
     );
   } finally {
     await disconnectDatabase();
